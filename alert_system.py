@@ -44,6 +44,7 @@ def send_alert(vehicle):
     print("Emergency Contact:", vehicle["emergency_contact"])
 
 
+
 def simulate_accident(plate_number, camera_id):
     print("\n🚗 Accident Detected!\n")
 
