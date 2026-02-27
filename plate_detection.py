@@ -32,3 +32,4 @@ def detect_plate_from_frame(frame):
             return cleaned_text
 
     return None
+    
