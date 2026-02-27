@@ -1,0 +1,241 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-navy-950 text-slate-100 font-body antialiased;
+    background-image: radial-gradient(ellipse at 20% 50%, rgba(37,99,235,0.08) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 20%, rgba(220,38,38,0.05) 0%, transparent 50%);
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-navy-950;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-navy-600 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-brand-blue-light;
+  }
+}
+
+@layer components {
+  /* ── Glass Card ─────────────────────────────────────── */
+  .glass-card {
+    @apply bg-navy-800/60 backdrop-blur-sm border border-white/5 rounded-xl shadow-card;
+    position: relative;
+    overflow: hidden;
+  }
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(59,130,246,0.15) 0%, transparent 50%, rgba(220,38,38,0.08) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  .glass-card:hover {
+    @apply shadow-card-hover;
+    transform: translateY(-1px);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ── Stat Card ──────────────────────────────────────── */
+  .stat-card {
+    @apply glass-card p-5 cursor-default;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ── Glow Line Top ──────────────────────────────────── */
+  .glow-top-blue::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%; height: 1px;
+    background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+    box-shadow: 0 0 8px rgba(59,130,246,0.6);
+  }
+  .glow-top-red::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%; height: 1px;
+    background: linear-gradient(90deg, transparent, #ef4444, transparent);
+    box-shadow: 0 0 8px rgba(239,68,68,0.6);
+  }
+  .glow-top-emerald::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%; height: 1px;
+    background: linear-gradient(90deg, transparent, #10b981, transparent);
+    box-shadow: 0 0 8px rgba(16,185,129,0.6);
+  }
+  .glow-top-amber::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%; height: 1px;
+    background: linear-gradient(90deg, transparent, #f59e0b, transparent);
+    box-shadow: 0 0 8px rgba(245,158,11,0.6);
+  }
+
+  /* ── Nav Item ───────────────────────────────────────── */
+  .nav-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 text-sm font-body font-medium;
+    transition: all 0.2s ease;
+  }
+  .nav-link:hover {
+    @apply bg-navy-700/70 text-slate-200;
+  }
+  .nav-link.active {
+    @apply bg-brand-blue/15 text-brand-blue-glow;
+    box-shadow: inset 2px 0 0 #3b82f6;
+  }
+
+  /* ── Status Badge ───────────────────────────────────── */
+  .badge-active {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-mono font-semibold tracking-wider;
+    @apply bg-red-500/10 text-red-400 border border-red-500/25;
+  }
+  .badge-resolved {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-mono font-semibold tracking-wider;
+    @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/25;
+  }
+
+  /* ── Input ──────────────────────────────────────────── */
+  .input-field {
+    @apply w-full bg-navy-800 border border-white/10 rounded-xl px-4 py-3;
+    @apply text-slate-100 placeholder-slate-600 font-mono text-sm;
+    @apply focus:outline-none focus:border-brand-blue-light/50 focus:ring-2 focus:ring-brand-blue/10;
+    transition: all 0.2s ease;
+  }
+
+  /* ── Primary Button ─────────────────────────────────── */
+  .btn-primary {
+    @apply flex items-center gap-2 px-6 py-3 rounded-xl font-display text-sm font-semibold tracking-widest;
+    @apply bg-gradient-to-r from-brand-blue to-brand-blue-light text-white;
+    @apply hover:from-brand-blue-light hover:to-brand-blue-glow;
+    @apply disabled:opacity-40 disabled:cursor-not-allowed;
+    @apply shadow-blue-glow;
+    transition: all 0.25s ease;
+  }
+  .btn-primary:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 30px rgba(59,130,246,0.5);
+  }
+
+  /* ── Section Header ─────────────────────────────────── */
+  .section-header {
+    @apply flex items-center gap-3 mb-5;
+  }
+  .section-title {
+    @apply font-display text-sm font-semibold tracking-widest uppercase text-slate-400;
+    white-space: nowrap;
+  }
+  .section-line {
+    @apply flex-1 h-px;
+    background: linear-gradient(90deg, rgba(59,130,246,0.2), transparent);
+  }
+
+  /* ── Scanline overlay ───────────────────────────────── */
+  .scanline-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    border-radius: inherit;
+  }
+  .scanline-overlay::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 30%;
+    background: linear-gradient(transparent, rgba(59,130,246,0.025), transparent);
+    animation: scanline 6s linear infinite;
+  }
+
+  /* ── Loading Spinner ────────────────────────────────── */
+  .spinner {
+    @apply w-7 h-7 rounded-full;
+    border: 2px solid rgba(59,130,246,0.15);
+    border-top-color: #3b82f6;
+    animation: spin 0.75s linear infinite;
+  }
+
+  /* ── Pulse dot ──────────────────────────────────────── */
+  .pulse-dot {
+    @apply w-2 h-2 rounded-full;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+/* Leaflet dark overrides */
+.leaflet-container {
+  background: #020817 !important;
+  font-family: 'JetBrains Mono', monospace !important;
+}
+.leaflet-popup-content-wrapper {
+  background: rgba(8,20,40,0.97) !important;
+  border: 1px solid rgba(59,130,246,0.3) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(59,130,246,0.1) !important;
+  color: #e2e8f0 !important;
+}
+.leaflet-popup-tip {
+  background: rgba(8,20,40,0.97) !important;
+}
+.leaflet-popup-content {
+  margin: 0 !important;
+}
+.leaflet-control-zoom a {
+  background-color: rgba(8,20,40,0.9) !important;
+  color: #60a5fa !important;
+  border-color: rgba(59,130,246,0.2) !important;
+}
+.leaflet-control-zoom a:hover {
+  background-color: rgba(37,99,235,0.2) !important;
+}
+.leaflet-bar {
+  border: 1px solid rgba(59,130,246,0.2) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+}
+.leaflet-control-attribution {
+  background: rgba(2,8,23,0.8) !important;
+  color: rgba(148,163,184,0.4) !important;
+  font-size: 9px !important;
+  font-family: 'JetBrains Mono', monospace !important;
+}
+.leaflet-control-attribution a {
+  color: rgba(96,165,250,0.5) !important;
+}
+
+/* Recharts overrides */
+.recharts-wrapper .recharts-cartesian-grid-horizontal line,
+.recharts-wrapper .recharts-cartesian-grid-vertical line {
+  stroke: rgba(59,130,246,0.07) !important;
+}
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: rgba(8,20,40,0.96) !important;
+  border: 1px solid rgba(59,130,246,0.3) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 12px !important;
+}
