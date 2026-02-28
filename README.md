@@ -124,19 +124,6 @@ However, in this project:
 The objective was to show how the system ecosystem works together —  
 from detection to emergency response.
 
-## 🏗 System Architecture Overview
-
-SANJEEVANI integrates:
-
-- 🎥 Accident Detection Model (YOLO-based)
-- 🔍 Number Plate Detection + OCR
-- 🗂 Simulated VAHAN Registry Integration
-- 📍 CCTV Location Mapping System
-- 🚓 Nearest Emergency Service Finder
-- 🚑 Ambulance Dispatch System
-- 📡 Live Ambulance Tracking
-- 🏥 Hospital Preparation Based on Severity Estimation
-
 It is not just a detection model.
 
 It is an automated emergency response framework.
