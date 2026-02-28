@@ -165,10 +165,10 @@ Experience the system in action: [Sanjeevani - Working Demo](https://drive.googl
 ![Live Feed](screenshots/2.png)
 
 ### 🗺️ Geospatial Accident Map
-![Accident Map](screenshots/3.png)
+![Accident Map](screenshots/4.png)
 
 ### 🎥 CCTV Monitoring & Detection
-![CCTV Monitor](screenshots/4.png)
+![CCTV Monitor](screenshots/3.png)
 
 ### 🔍 Vehicle Registry Lookup
 ![Vehicle Search](screenshots/5.png)
