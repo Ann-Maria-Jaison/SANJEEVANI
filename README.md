@@ -295,4 +295,4 @@ This project is licensed under the [MIT License](./LICENSE).
 - [x] **Lowercase folder names**: Verified project structure.
 - [x] **No spaces in filenames**: Verified.
 
-Made with ❤️ from TinkerHub
+Made with lots of ❤️
