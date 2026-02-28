@@ -73,7 +73,7 @@ Every second matters.
 
 ## 📍 Accident Location Intelligence
 
-We also created a Simulated Statewide CCTV Location Mapping System (Kerala).
+We also created a Statewide CCTV Location Mapping System (Kerala).
 
 When an accident is detected:
 
@@ -128,12 +128,28 @@ It is not just a detection model.
 
 It is an automated emergency response framework.
 
-## � Working Demo
+##  Working Demo
 
 Experience the system in action: [Sanjeevani - Working Demo](https://drive.google.com/drive/folders/1qhu3jCne-fNt81Jru8dO7fcHBwzJu6lP?usp=sharing)
 
+## 📸 Screenshots
 
-## �🛠 Tech Stack
+### 🖥️ Command Dashboard
+![Dashboard](./screenshots/dashboard.png)
+
+### 🚨 Live Accident Feed
+![Live Feed](./screenshots/live_feed.png)
+
+### 🗺️ Geospatial Accident Map
+![Accident Map](./screenshots/accident_map.png)
+
+### 🎥 CCTV Monitoring & Detection
+![CCTV Monitor](./screenshots/cctv_monitor.png)
+
+### 🔍 Vehicle Registry Lookup
+![Vehicle Search](./screenshots/vehicle_search.png)
+
+## 🛠 Tech Stack
 
 - **Frontend:** React, Vite, Tailwind CSS, Leaflet (Mapping), Recharts (Analytics), Lucide React (Icons)
 - **Backend:** FastAPI (Python), Uvicorn, Pydantic
