@@ -128,7 +128,12 @@ It is not just a detection model.
 
 It is an automated emergency response framework.
 
-## 🛠 Tech Stack
+## � Working Demo
+
+Experience the system in action: [Sanjeevani - Working Demo](https://drive.google.com/drive/folders/1qhu3jCne-fNt81Jru8dO7fcHBwzJu6lP?usp=sharing)
+
+
+## �🛠 Tech Stack
 
 - **Frontend:** React, Vite, Tailwind CSS, Leaflet (Mapping), Recharts (Analytics), Lucide React (Icons)
 - **Backend:** FastAPI (Python), Uvicorn, Pydantic
