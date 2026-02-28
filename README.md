@@ -159,19 +159,19 @@ Experience the system in action: [Sanjeevani - Working Demo](https://drive.googl
 ## 📸 Screenshots
 
 ### 🖥️ Command Dashboard
-![Dashboard](./screenshots/dashboard.png)
+![Dashboard](screenshots/1.png)
 
 ### 🚨 Live Accident Feed
-![Live Feed](./screenshots/live_feed.png)
+![Live Feed](screenshots/2.png)
 
 ### 🗺️ Geospatial Accident Map
-![Accident Map](./screenshots/accident_map.png)
+![Accident Map](screenshots/3.png)
 
 ### 🎥 CCTV Monitoring & Detection
-![CCTV Monitor](./screenshots/cctv_monitor.png)
+![CCTV Monitor](screenshots/4.png)
 
 ### 🔍 Vehicle Registry Lookup
-![Vehicle Search](./screenshots/vehicle_search.png)
+![Vehicle Search](screenshots/5.png)
 
 ## 🛠 Tech Stack
 
