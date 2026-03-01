@@ -128,12 +128,12 @@ It is an automated emergency response framework.
 
 ## ✨ Key Features
 
-- **🚀 Real-time Accident Detection**: YOLOv8-powered computer vision to detect incidents instantly.
-- **🔍 Smart OCR Vehicle Tracking**: Automatic number plate recognition using EasyOCR.
-- **🗂 VAHAN Registry Integration**: Simulated database to fetch vehicle owner and emergency contact details.
-- **📍 Geospatial Intelligence**: Maps accident locations to the nearest hospitals and police stations.
-- **🚑 Live Tracking System**: Real-time ambulance dispatch and tracking for families and hospitals.
-- **📊 Analytics Dashboard**: Comprehensive data visualization of accident trends and response times.
+- **Real-time Accident Detection**: YOLOv8-powered computer vision to detect incidents instantly.
+- **Smart OCR Vehicle Tracking**: Automatic number plate recognition using EasyOCR.
+- **VAHAN Registry Integration**: Simulated database to fetch vehicle owner and emergency contact details.
+- **Geospatial Intelligence**: Maps accident locations to the nearest hospitals and police stations.
+- **Live Tracking System**: Real-time ambulance dispatch and tracking for families and hospitals.
+- **Analytics Dashboard**: Comprehensive data visualization of accident trends and response times.
 
 ## 🏗 System Architecture
 
@@ -260,8 +260,8 @@ Because when accidents happen,
 
 Every second matters.
 
-## 👥 Team Members
-- [Ann Maria Jaison](https://github.com/Ann-Maria-Jaison) - Lead Developer
+## 👥 Built BY
+- [Ann Maria Jaison](https://github.com/Ann-Maria-Jaison) 
 
 ## 📜 License
 This project is licensed under the [MIT License](./LICENSE).
