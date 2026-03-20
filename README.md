@@ -4,6 +4,7 @@ Because Accidents Shouldn’t Become Content.
 
 ## 💭 The Thought
 
+
 When an accident happens, something strange happens too.
 
 Humanity pauses.
