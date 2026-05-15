@@ -1,3 +1,4 @@
+from httpx import request
 from fastapi import APIRouter, HTTPException
 from typing import List
 from models.schemas import AccidentReport, AccidentResponse, AccidentSchema
@@ -22,7 +23,8 @@ async def report_accident(report: AccidentReport):
         "plate": report.plate,
         "camera_id": report.camera_id,
         "accident_time": report.accident_time.isoformat(),
-        "status": "reported"
+        "status": "reported",
+        "confidence": report.confidence   # ADDED THIS LINE
     }
     log_res = supabase.table("accident_logs").insert(log_data).execute()
     
@@ -45,7 +47,8 @@ async def report_accident(report: AccidentReport):
         owner_phone=vehicle.get("owner_phone", "N/A"),
         emergency_contact=vehicle.get("emergency_contact", "N/A"),
         location=camera.get("area_name", "Unknown"),
-        severity="HIGH"
+        severity="HIGH",
+        confidence=report.confidence  # ADDED THIS LINE
     )
 
 @router.get("/accidents", response_model=List[AccidentSchema])
