@@ -23,10 +23,25 @@ const SEVERITY_STYLES = {
   LOW: 'bg-slate-500/10 text-slate-500 border-slate-500/20',
 }
 
+const CONFIDENCE_STYLES = {
+  HIGH: { style: 'bg-green-500/15 text-green-400 border-green-500/30', label: 'High Confidence' },
+  MEDIUM: { style: 'bg-amber-500/15 text-amber-400 border-amber-500/30', label: 'Med Confidence' },
+  LOW: { style: 'bg-red-500/15 text-red-400 border-red-500/30', label: 'Low Confidence' },
+}
+
+function getConfidenceLevel(conf) {
+  if (!conf) return null
+  if (conf > 0.85) return 'HIGH'
+  if (conf >= 0.60) return 'MEDIUM'
+  return 'LOW'
+}
+
 export default function AccidentCard({ accident, style }) {
   const isActive = accident.status === 'ACTIVE'
   const severity = accident.severity || (isActive ? 'HIGH' : 'LOW')
   const severityStyle = SEVERITY_STYLES[severity] || SEVERITY_STYLES.LOW
+  const confidenceLevel = getConfidenceLevel(accident.confidence)  // ADDED THIS
+  const confidenceInfo = confidenceLevel ? CONFIDENCE_STYLES[confidenceLevel] : null  // ADDED THIS
 
   return (
     <div
@@ -95,6 +110,20 @@ export default function AccidentCard({ accident, style }) {
             )}>
               {severity}
             </span>
+
+            {/* Confidence badge */}
+            {confidenceInfo && (
+              <span className={clsx(
+                'font-mono text-[9px] tracking-widest px-1.5 py-0.5 rounded border font-bold',
+                confidenceInfo.style
+              )}>
+                {accident.confidence
+                  ? `${(accident.confidence * 100).toFixed(0)}% ${confidenceInfo.label}`
+                  : null
+                }
+              </span>
+            )}
+
           </div>
         </div>
 
