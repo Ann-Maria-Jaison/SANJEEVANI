@@ -45,11 +45,12 @@ def fetch_db_plates():
 DB_PLATES = fetch_db_plates()
 
 # -------- SEND TO BACKEND --------
-def report_to_backend(plate, camera_id="CAM001"):
+def report_to_backend(plate, confidence, camera_id="CAM001"):
     payload = {
         "plate": plate,
         "camera_id": camera_id,
-        "accident_time": datetime.now().isoformat()
+        "accident_time": datetime.now().isoformat(),
+        "confidence": confidence 
     }
     try:
         print(f"📡 Sending report to backend: {payload}")
@@ -119,7 +120,7 @@ while True:
                             print(f"⚠️ OCR failed. Using registered plate from database: {plate}")
 
                         print(f"✅ Final Plate: {plate}")
-                        if report_to_backend(plate):
+                        if report_to_backend(plate, conf):
                             reported = True
                             print("✅ Incident Reported Successfully.\n")
 
