@@ -52,3 +52,5 @@ class AccidentSchema(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     severity: Optional[str] = "LOW"
+    confidence: Optional[float] = None
+    is_false_positive: Optional[bool] = False  # ADD THIS LINE
