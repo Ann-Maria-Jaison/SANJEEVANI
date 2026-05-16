@@ -1,5 +1,5 @@
-import React from 'react'
-import { MapPin, User, Clock, Car, AlertTriangle, CheckCircle2, Phone, FileText } from 'lucide-react'
+import React, { useState } from 'react'
+import { MapPin, User, Clock, Car, AlertTriangle, CheckCircle2, Phone, FileText, XCircle } from 'lucide-react'
 import clsx from 'clsx'
 
 function timeAgo(ts) {
@@ -27,6 +27,9 @@ export default function AccidentCard({ accident, style }) {
   const isActive = accident.status === 'ACTIVE'
   const severity = accident.severity || (isActive ? 'HIGH' : 'LOW')
   const severityStyle = SEVERITY_STYLES[severity] || SEVERITY_STYLES.LOW
+  const [isFalsePositive, setIsFalsePositive] = useState(accident.is_false_positive || false)  // ADD
+  const [showConfirm, setShowConfirm] = useState(false)  // ADD
+  const [isLoading, setIsLoading] = useState(false)  // ADD
 
   return (
     <div
@@ -142,6 +145,57 @@ export default function AccidentCard({ accident, style }) {
             <span className="font-mono text-[9px] text-amber-500/70 tracking-wider">
               {accident.emergency_contact}
             </span>
+          </div>
+        )}
+        {/* False positive button */}
+        {!isFalsePositive && (
+          <div className="mt-3 pt-2 border-t border-white/[0.04]">
+            {!showConfirm ? (
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowConfirm(true) }}
+                className="flex items-center gap-1.5 text-[10px] text-slate-600 hover:text-red-400 transition-colors"
+              >
+                <XCircle className="w-3 h-3" />
+                Mark as false positive
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-slate-500">Are you sure?</span>
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation()
+                    setIsLoading(true)
+                    try {
+                      await fetch(`http://localhost:8000/accidents/${accident.id}/false-positive`, {
+                        method: 'PATCH'
+                      })
+                      setIsFalsePositive(true)
+                    } catch (err) {
+                      console.error(err)
+                    }
+                    setIsLoading(false)
+                    setShowConfirm(false)
+                  }}
+                  className="text-[10px] text-red-400 hover:text-red-300 font-bold"
+                >
+                  {isLoading ? 'Saving...' : 'Confirm'}
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setShowConfirm(false) }}
+                  className="text-[10px] text-slate-600 hover:text-slate-400"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* False positive indicator */}
+        {isFalsePositive && (
+          <div className="mt-3 pt-2 border-t border-white/[0.04] flex items-center gap-1.5">
+            <XCircle className="w-3 h-3 text-slate-600" />
+            <span className="text-[10px] text-slate-600 tracking-wider">Marked as false positive</span>
           </div>
         )}
       </div>
