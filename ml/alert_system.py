@@ -31,7 +31,7 @@ def log_accident(plate, camera_id):
     supabase.table("accident_logs").insert({
         "plate": plate,
         "camera_id": camera_id,
-        "status": "ALERT_SENT"
+        "status": "reported"
     }).execute()
 
     print("✅ Accident logged in database")
