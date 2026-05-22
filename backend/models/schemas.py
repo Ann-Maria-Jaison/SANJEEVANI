@@ -6,6 +6,7 @@ class AccidentReport(BaseModel):
     plate: str
     camera_id: str
     accident_time: datetime
+    confidence: Optional[float] = None
 
 class AccidentResponse(BaseModel):
     status: str
@@ -19,6 +20,7 @@ class AccidentResponse(BaseModel):
     emergency_contact: str
     location: str
     severity: str
+    confidence: Optional[float] = None  # ADDED THIS LINE
 
 class VehicleSchema(BaseModel):
     plate: str
@@ -52,3 +54,4 @@ class AccidentSchema(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     severity: Optional[str] = "LOW"
+    confidence: Optional[float] = None  # ADDED THIS LINE
