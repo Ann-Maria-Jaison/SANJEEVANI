@@ -249,6 +249,21 @@ Sanjeevani responds.
 - AI-based injury severity prediction improvement
 - Statewide CCTV network integration
 
+## Code of Conduct
+
+Please note that this project is released with a [Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
+
+## 🤝🏻 Contributing Guide
+
+Contributions make the open-source community an amazing place to learn, inspire and create. Any contributions you make are **greatly appreciated**. 
+- View: [CONTRIBUTING.md](CONTRIBUTING.md)
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
 ## ❤️ Final Note
 
 SANJEEVANI is not just an ML project.
@@ -267,5 +282,13 @@ Every second matters.
 ## 📜 License
 This project is licensed under the [MIT License](./LICENSE).
 
+<div align="center">
+
 ---
 Made with lots of ❤️
+
+---
+
+**[⬆ Back to Top](#sanjeevani)**
+
+</div>
