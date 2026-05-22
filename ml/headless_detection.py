@@ -24,8 +24,9 @@ def fetch_db_plates():
         res = requests.get(f"{API_URL}/vehicles/all", timeout=5)
         if res.status_code == 200:
             return [v["plate"] for v in res.json()]
-    except: pass
-    return ["KL10UV9900", "KL07CD5678", "KL03GH6789"]
+    except requests.exceptions.RequestException as e:
+        print(f"⚠️ Could not fetch plates from API: {e}")
+        return ["KL10UV9900", "KL07CD5678", "KL03GH6789"]
 
 DB_PLATES = fetch_db_plates()
 
@@ -38,7 +39,9 @@ def report_to_backend(plate, camera_id="CAM001"):
     try:
         requests.post(f"{API_URL}/report-accident", json=payload, timeout=5)
         return True
-    except: return False
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Failed to report accident to backend: {e}")
+        return False
 
 print("🚀 Headless AI Detection Engine Started...")
 
