@@ -92,6 +92,21 @@ async def get_accidents():
             "location": camera.get("area_name"),
             "latitude": camera.get("latitude"),
             "longitude": camera.get("longitude"),
+            "is_false_positive": a.get("is_false_positive", False),  # ADD THIS LINE
         })
 
     return enriched
+
+
+@router.patch("/accidents/{accident_id}/false-positive")
+async def mark_false_positive(accident_id: int):
+    # Update the record in Supabase
+    res = supabase.table("accident_logs") \
+        .update({"is_false_positive": True}) \
+        .eq("id", accident_id) \
+        .execute()
+
+    if not res.data:
+        raise HTTPException(status_code=404, detail="Accident not found")
+
+        return {"message": "Marked as false positive", "accident_id": accident_id}
