@@ -13,7 +13,6 @@ class AccidentResponse(BaseModel):
     plate: str
     message: str
     accident_id: int
-    status: str
     # Enriched details returned on report
     owner_name: str
     owner_phone: str
