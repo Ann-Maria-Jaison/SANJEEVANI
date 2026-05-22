@@ -6,19 +6,20 @@ class AccidentReport(BaseModel):
     plate: str
     camera_id: str
     accident_time: datetime
+    confidence: Optional[float] = None
 
 class AccidentResponse(BaseModel):
     status: str
     plate: str
     message: str
     accident_id: int
-    status: str
     # Enriched details returned on report
     owner_name: str
     owner_phone: str
     emergency_contact: str
     location: str
     severity: str
+    confidence: Optional[float] = None  # ADDED THIS LINE
 
 class VehicleSchema(BaseModel):
     plate: str

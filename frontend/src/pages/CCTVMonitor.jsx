@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Camera, Shield, Activity, Landmark, Navigation2, Send, AlertTriangle } from 'lucide-react'
 import clsx from 'clsx'
 import api, { accidentService } from '../api'
+import ErrorBanner from '../components/ErrorBanner'
 
 const CAMERAS = [
     { id: 'CAM001', name: 'Downtown Crossing', video: '/accident_video.mp4' },
@@ -12,12 +13,15 @@ export default function CCTVMonitor() {
     const [emergencyDetails, setEmergencyDetails] = useState(null)
     const [alertSent, setAlertSent] = useState(false)
     const [ambulancePos, setAmbulancePos] = useState(0) // 0 to 100%
+    const [pollingError, setPollingError] = useState(null)
 
     // Simulated Polling for new accidents
     useEffect(() => {
         const checkAccidents = async () => {
             try {
-                const accidents = await accidentService.getAll()
+                const data = await accidentService.getAll()
+                const accidents = Array.isArray(data) ? data : []
+                setPollingError(null)
                 const activeOnes = accidents.filter(a =>
                     ['reported', 'Detected', 'Pending', 'ACTIVE'].includes(a.status)
                 )
@@ -28,6 +32,7 @@ export default function CCTVMonitor() {
                 }
             } catch (err) {
                 console.error('Failed to poll accidents', err)
+                setPollingError('Connection error: unable to reach accident service. Retrying…')
             }
         }
 
@@ -80,6 +85,11 @@ export default function CCTVMonitor() {
                 </div>
             </div>
 
+            <ErrorBanner
+                message={pollingError}
+                onDismiss={() => setPollingError(null)}
+            />
+
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0">
                 {/* Camera Grid */}
                 <div className="lg:col-span-8 flex flex-col gap-4 overflow-y-auto pr-2">
@@ -125,10 +135,18 @@ export default function CCTVMonitor() {
                 {/* Incident Panel */}
                 <div className="lg:col-span-4 flex flex-col gap-4 min-h-0">
                     {!activeIncident ? (
-                        <div className="glass-card flex-1 flex flex-col items-center justify-center p-8 text-center opacity-50 border-dashed">
-                            <Activity className="w-12 h-12 text-slate-700 mb-4" />
-                            <p className="font-mono text-xs text-slate-500 tracking-wider">No Active Incidents Detected</p>
-                        </div>
+                        pollingError ? (
+                            <div className="glass-card flex-1 flex flex-col items-center justify-center p-8 text-center border-dashed border-red-500/30">
+                                <AlertTriangle className="w-12 h-12 text-red-500/50 mb-4" />
+                                <p className="font-mono text-xs text-red-400 tracking-wider mb-1">Unable to fetch incident status</p>
+                                <p className="font-mono text-[10px] text-slate-500 tracking-wider">Backend connection lost. Retrying automatically…</p>
+                            </div>
+                        ) : (
+                            <div className="glass-card flex-1 flex flex-col items-center justify-center p-8 text-center opacity-50 border-dashed">
+                                <Activity className="w-12 h-12 text-slate-700 mb-4" />
+                                <p className="font-mono text-xs text-slate-500 tracking-wider">No Active Incidents Detected</p>
+                            </div>
+                        )
                     ) : (
                         <div className="glass-card flex-1 flex flex-col p-5 animate-scale-in border-red-500/30">
                             <div className="flex items-center gap-3 mb-6">
