@@ -5,6 +5,9 @@ import requests
 import random
 from datetime import datetime
 from plate_detection import detect_plate_from_frame
+from severity_classifier import SeverityClassifier
+
+severity_clf = SeverityClassifier("severity_cls.pt")
 
 # -------- CONFIG --------
 API_URL = "http://localhost:8000"
@@ -45,12 +48,15 @@ def fetch_db_plates():
 DB_PLATES = fetch_db_plates()
 
 # -------- SEND TO BACKEND --------
-def report_to_backend(plate, confidence, camera_id="CAM001"):
+def report_to_backend(plate, confidence, camera_id="CAM001", severity_result=None):
     payload = {
         "plate": plate,
         "camera_id": camera_id,
         "accident_time": datetime.now().isoformat(),
-        "confidence": confidence 
+        "confidence": confidence,
+         "severity": severity_result.get("severity", "Unknown") if severity_result else "Unknown",
+        "severity_confidence": severity_result.get("confidence", 0.0) if severity_result else 0.0,
+        "hospital_protocol": severity_result.get("protocol", "") if severity_result else "",
     }
     try:
         print(f"📡 Sending report to backend: {payload}")
@@ -62,6 +68,8 @@ def report_to_backend(plate, confidence, camera_id="CAM001"):
             print(f"   Phone     : {data.get('owner_phone', 'N/A')}")
             print(f"   Emergency : {data.get('emergency_contact', 'N/A')}")
             print(f"   Location  : {data.get('location', 'N/A')}")
+            print(f"   Severity  : {payload['severity']} ({payload['severity_confidence']*100:.0f}%)")
+            print(f"   Protocol  : {payload['hospital_protocol']}")
             return True
         else:
             print(f"❌ Failed. Status: {response.status_code} - {response.text}")
@@ -73,6 +81,7 @@ def report_to_backend(plate, confidence, camera_id="CAM001"):
 print("▶ Smooth optimized video running...\n")
 
 reported = False
+
 
 while True:
     ret, frame = cap.read()
@@ -120,7 +129,10 @@ while True:
                             print(f"⚠️ OCR failed. Using registered plate from database: {plate}")
 
                         print(f"✅ Final Plate: {plate}")
-                        if report_to_backend(plate, conf):
+                        severity_result = severity_clf.classify(small_frame)
+                        print(f"🚨 Severity: {severity_result['severity']} ({severity_result['confidence']*100:.0f}%)")
+                        
+                        if report_to_backend(plate, conf,severity_result=severity_result):
                             reported = True
                             print("✅ Incident Reported Successfully.\n")
 
