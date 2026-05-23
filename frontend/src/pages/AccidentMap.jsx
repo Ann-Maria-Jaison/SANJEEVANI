@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react'
 import L from 'leaflet'
+import 'leaflet.heat'
 import { Map, AlertCircle, CheckCircle2, Navigation, Info, Layers } from 'lucide-react'
 import LoadingSpinner from '../components/LoadingSpinner'
 
@@ -85,8 +86,32 @@ export default function AccidentMap({ accidents, loading }) {
 
     L.control.zoom({ position: 'topright' }).addTo(map)
     mapInstance.current = map
+  const heatPoints = accidents.map(a => [
+  a.latitude,
+  a.longitude,
+  a.status === 'ACTIVE' ? 1 : 0.5
+]);
 
-    return () => { map.remove(); mapInstance.current = null }
+const heatLayer = L.heatLayer(heatPoints, {
+  radius: 40,
+  blur: 25,
+  maxZoom: 17,
+  gradient: {
+    0.2: "#00f",
+    0.4: "#0ff",
+    0.6: "#0f0",
+    0.8: "#ff0",
+    1.0: "#f00"
+  }
+}).addTo(map);
+
+
+  return () => {
+  heatLayer.remove();
+  map.remove();
+  mapInstance.current = null;
+};
+
   }, [])
 
   // Sync Markers
