@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { MapPin, User, Clock, Car, AlertTriangle, CheckCircle2, Phone, FileText, XCircle } from 'lucide-react'
 import clsx from 'clsx'
+import api from '../api'
 
 function timeAgo(ts) {
   const diff = Math.floor((Date.now() - new Date(ts)) / 1000)
@@ -40,9 +41,10 @@ export default function AccidentCard({ accident, style }) {
   const isActive = accident.status === 'ACTIVE'
   const severity = accident.severity || (isActive ? 'HIGH' : 'LOW')
   const severityStyle = SEVERITY_STYLES[severity] || SEVERITY_STYLES.LOW
-  const [isFalsePositive, setIsFalsePositive] = useState(accident.is_false_positive || false)  // ADD
-  const [showConfirm, setShowConfirm] = useState(false)  // ADD
-  const [isLoading, setIsLoading] = useState(false)  // ADD
+  const [isFalsePositive, setIsFalsePositive] = useState(accident.is_false_positive || false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasError, setHasError] = useState(false)
   const confidenceLevel = getConfidenceLevel(accident.confidence)  // ADDED THIS
   const confidenceInfo = confidenceLevel ? CONFIDENCE_STYLES[confidenceLevel] : null  // ADDED THIS
 
@@ -188,33 +190,38 @@ export default function AccidentCard({ accident, style }) {
                 Mark as false positive
               </button>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[10px] text-slate-500">Are you sure?</span>
                 <button
                   onClick={async (e) => {
                     e.stopPropagation()
                     setIsLoading(true)
+                    setHasError(false)
                     try {
-                      await fetch(`http://localhost:8000/accidents/${accident.id}/false-positive`, {
-                        method: 'PATCH'
-                      })
+                      await api.patch(`/accidents/${accident.id}/false-positive`)
                       setIsFalsePositive(true)
+                      setShowConfirm(false)
                     } catch (err) {
-                      console.error(err)
+                      console.error('Failed to mark false positive:', err)
+                      setHasError(true)
+                    } finally {
+                      setIsLoading(false)
                     }
-                    setIsLoading(false)
-                    setShowConfirm(false)
                   }}
-                  className="text-[10px] text-red-400 hover:text-red-300 font-bold"
+                  disabled={isLoading}
+                  className="text-[10px] text-red-400 hover:text-red-300 font-bold disabled:opacity-50"
                 >
                   {isLoading ? 'Saving...' : 'Confirm'}
                 </button>
                 <button
-                  onClick={(e) => { e.stopPropagation(); setShowConfirm(false) }}
+                  onClick={(e) => { e.stopPropagation(); setShowConfirm(false); setHasError(false) }}
                   className="text-[10px] text-slate-600 hover:text-slate-400"
                 >
                   Cancel
                 </button>
+                {hasError && (
+                  <span className="text-[10px] text-red-400 w-full mt-0.5">Failed to save. Try again.</span>
+                )}
               </div>
             )}
           </div>

@@ -100,13 +100,15 @@ async def get_accidents():
 
 @router.patch("/accidents/{accident_id}/false-positive")
 async def mark_false_positive(accident_id: int):
-    # Update the record in Supabase
-    res = supabase.table("accident_logs") \
-        .update({"is_false_positive": True}) \
-        .eq("id", accident_id) \
-        .execute()
+    try:
+        res = supabase.table("accident_logs") \
+            .update({"is_false_positive": True}) \
+            .eq("id", accident_id) \
+            .execute()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
     if not res.data:
         raise HTTPException(status_code=404, detail="Accident not found")
 
-        return {"message": "Marked as false positive", "accident_id": accident_id}
+    return {"message": "Marked as false positive", "accident_id": accident_id}
