@@ -23,7 +23,7 @@ export default function Sidebar({ isOnline }) {
   const location = useLocation()
 
   return (
-    <aside className="fixed top-0 left-0 bottom-0 w-[220px] flex flex-col bg-navy-900/80 backdrop-blur-md border-r border-white/5 z-50">
+    <aside className="fixed top-0 left-0 bottom-0 w-[220px] flex flex-col bg-navy-950/80 backdrop-blur-xl border-r border-white/10 z-50 shadow-[4px_0_24px_rgba(0,0,0,0.5)]">
       {/* Top accent line */}
       <div className="h-px w-full bg-gradient-to-r from-transparent via-brand-blue/60 to-transparent" />
 
