@@ -48,7 +48,7 @@ export default function StatCard({ icon: Icon, label, value, sub, color = 'blue'
             {label}
           </p>
           <div className={clsx('w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg', c.icon)}>
-            <Icon className="w-4.5 h-4.5 drop-shadow-md" />
+            <Icon className="w-[18px] h-[18px] drop-shadow-md" />
           </div>
         </div>
 

@@ -102,8 +102,8 @@ const DashboardAreaChart = React.memo(({ data }) => (
         stroke="#60a5fa"
         strokeWidth={3}
         fill="url(#areaBlue)"
-        dot={{ fill: '#2563eb', r: 4, strokeWidth: 2, stroke: '#020817' }}
-        activeDot={{ r: 6, fill: '#60a5fa', strokeWidth: 3, stroke: '#020817' }}
+        dot={{ fill: '#2563eb', r: 4, strokeWidth: 2, stroke: '#020617' }}
+        activeDot={{ r: 6, fill: '#60a5fa', strokeWidth: 3, stroke: '#020617' }}
         isAnimationActive={true}
         animationDuration={800}
       />
@@ -113,8 +113,8 @@ const DashboardAreaChart = React.memo(({ data }) => (
         stroke="#10b981"
         strokeWidth={2}
         fill="url(#areaGreen)"
-        dot={{ fill: '#059669', r: 3, strokeWidth: 1, stroke: '#020817' }}
-        activeDot={{ r: 5, fill: '#34d399', strokeWidth: 2, stroke: '#020817' }}
+        dot={{ fill: '#059669', r: 3, strokeWidth: 1, stroke: '#020617' }}
+        activeDot={{ r: 5, fill: '#34d399', strokeWidth: 2, stroke: '#020617' }}
         isAnimationActive={true}
         animationDuration={800}
       />
@@ -139,7 +139,7 @@ const DashboardPieChart = React.memo(({ data }) => (
         animationDuration={1000}
       >
         {data.map((entry, i) => (
-          <Cell key={i} fill={entry.color} style={{ filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.3))' }} />
+          <Cell key={entry.name || i} fill={entry.color} style={{ filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.3))' }} />
         ))}
       </Pie>
       <Tooltip content={<CUSTOM_TOOLTIP_PIE />} />
@@ -166,15 +166,16 @@ export default function Dashboard({ accidents, loading, error }) {
 
     const chartData = buildChartData(accidents)
 
-    // Take the most recent accident for display
-    const lastAcc = accidents[0]
+    // Take the most recent accident for display by sorting
+    const sortedAccidents = [...accidents].sort((a, b) => new Date(b.accident_time) - new Date(a.accident_time))
+    const lastAcc = sortedAccidents[0]
     const lastPlate = lastAcc?.plate || 'Detecting...'
     const lastLocation = lastAcc?.location?.split(',')[0] || 'Kochi'
-    const lastLocationSub = `${lastAcc?.status || 'ACTIVE'} · ${lastAcc?.camera_id || 'CAM'}`
+    const lastLocationSub = lastAcc ? `${lastAcc.status} · ${lastAcc.camera_id || 'CAM'}` : 'Waiting for data'
 
     // Calculate secondary stats purely from data
     const avgResponse = Math.max(5, 15 - activeCount)
-    const activeZones = new Set(accidents.filter(a => a.status === 'ACTIVE').map(a => a.camera_id)).size || 1
+    const activeZones = new Set(accidents.filter(a => a.status === 'ACTIVE').map(a => a.camera_id)).size
 
     return {
       total: accidents.length,

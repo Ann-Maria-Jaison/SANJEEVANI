@@ -14,11 +14,19 @@
   body {
     @apply bg-navy-950 text-slate-100 font-body antialiased;
     background-color: #020617; /* Slate 950 */
+  }
+
+  /* Fixed gradient background to avoid iOS Safari jank */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -1;
     background-image: 
       radial-gradient(circle at 15% 50%, rgba(37, 99, 235, 0.12), transparent 40%),
       radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.08), transparent 40%),
       radial-gradient(circle at 50% 100%, rgba(220, 38, 38, 0.05), transparent 50%);
-    background-attachment: fixed;
+    pointer-events: none;
   }
 
   ::-webkit-scrollbar {
