@@ -63,6 +63,9 @@ export default function LiveFeed({ accidents, loading, error, lastRefresh, onRef
   }, [accidents, filterSeverity, filterTime, searchQuery, sortBy])
 
   const active = filteredAccidents.filter(a => isActiveStatus(a.status))
+  const severeEmergencies = active.filter(
+    a => (a.severity || 'HIGH') === 'HIGH'
+  )
   const resolved = filteredAccidents.filter(a => !isActiveStatus(a.status))
 
   return (
@@ -105,7 +108,23 @@ export default function LiveFeed({ accidents, loading, error, lastRefresh, onRef
       </div>
 
       <ErrorBanner message={error} />
+        {severeEmergencies.length > 0 && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 flex items-center gap-3 animate-pulse">
+          
+          <div className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.8)]" />
+          
+          <div className="flex flex-col">
+            <span className="font-mono text-[11px] text-red-300 tracking-[0.2em] uppercase font-bold">
+              Severe Emergency Detected
+            </span>
+            
+            <span className="font-mono text-[10px] text-red-400/70 tracking-wider">
+              Immediate response required for high-priority incidents
+            </span>
+          </div>
 
+        </div>
+      )}
       {/* ── Filter & Sort Bar ──────────────────────────────────── */}
       <div className="glass-card p-3 flex flex-col md:flex-row gap-3">
         {/* Search */}
