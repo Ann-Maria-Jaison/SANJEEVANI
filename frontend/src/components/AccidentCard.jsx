@@ -18,9 +18,9 @@ function formatTime(ts) {
 }
 
 const SEVERITY_STYLES = {
-  HIGH: 'bg-red-500/15 text-red-400 border-red-500/30',
-  MEDIUM: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-  LOW: 'bg-slate-500/10 text-slate-500 border-slate-500/20',
+  HIGH: 'bg-red-500/20 text-red-300 border-red-500/40 shadow-[0_0_12px_rgba(239,68,68,0.35)]',
+  MEDIUM: 'bg-orange-500/20 text-orange-300 border-orange-500/40 shadow-[0_0_10px_rgba(249,115,22,0.3)]',
+  LOW: 'bg-blue-500/10 text-blue-300 border-blue-500/30'
 }
 
 const CONFIDENCE_STYLES = {
@@ -39,6 +39,7 @@ function getConfidenceLevel(conf) {
 export default function AccidentCard({ accident, style }) {
   const isActive = accident.status === 'ACTIVE'
   const severity = accident.severity || (isActive ? 'HIGH' : 'LOW')
+  const severityLabels = {HIGH: 'SEVERE EMERGENCY', MEDIUM: 'CRITICAL',LOW: 'LOW RISK'}
   const severityStyle = SEVERITY_STYLES[severity] || SEVERITY_STYLES.LOW
   const [isFalsePositive, setIsFalsePositive] = useState(accident.is_false_positive || false)  // ADD
   const [showConfirm, setShowConfirm] = useState(false)  // ADD
@@ -51,9 +52,11 @@ export default function AccidentCard({ accident, style }) {
       className={clsx(
         'relative rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden group',
         'bg-navy-800/50 backdrop-blur-sm',
-        isActive
-          ? 'border-red-500/20 hover:border-red-500/40 hover:shadow-red-glow'
-          : 'border-white/5 hover:border-emerald-500/20 hover:shadow-card-hover'
+            severity === 'HIGH'
+      ? 'border-red-500/40 hover:border-red-500/70 hover:shadow-[0_0_25px_rgba(239,68,68,0.45)] animate-pulse'
+      : severity === 'MEDIUM'
+      ? 'border-orange-500/30 hover:border-orange-500/50 hover:shadow-[0_0_18px_rgba(249,115,22,0.35)]'
+      : 'border-white/5 hover:border-blue-500/20 hover:shadow-card-hover'
       )}
       style={style}
     >
@@ -111,7 +114,7 @@ export default function AccidentCard({ accident, style }) {
               'font-mono text-[9px] tracking-widest px-1.5 py-0.5 rounded border font-bold',
               severityStyle
             )}>
-              {severity}
+              {severityLabels[severity] || severity}
             </span>
 
             {/* Confidence badge */}
