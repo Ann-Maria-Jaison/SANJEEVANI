@@ -170,7 +170,18 @@ export default function AccidentCard({ accident, style }) {
             </span>
           </div>
         </div>
+      {severity === 'HIGH' && (
+        <div className="mt-3 flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 animate-pulse">
+          
+          <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
+          
+          <span className="font-mono text-[10px] text-red-300 tracking-widest uppercase font-semibold">
+            Emergency Response Required
+          </span>
 
+        </div>
+      )}
+      
         {/* Emergency contact strip */}
         {accident.emergency_contact && (
           <div className="mt-3 pt-2 border-t border-white/[0.04] flex items-center gap-2">
