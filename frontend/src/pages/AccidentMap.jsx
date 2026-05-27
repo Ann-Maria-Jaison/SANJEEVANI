@@ -53,8 +53,10 @@ const formatTime = (ts) => new Date(ts).toLocaleString('en-IN', {
 export default function AccidentMap({ accidents, loading }) {
   const mapRef = useRef(null)
   const mapInstance = useRef(null)
-  const markersRef = useRef({}) // Store by id
+  const markersRef = useRef({}) 
+  const heatLayerRef = useRef(null)
   const [selectedId, setSelectedId] = useState(null)
+  const [showHeatmap, setShowHeatmap] = useState(true)
 
   const activeCount = useMemo(() => accidents.filter(a => a.status === 'ACTIVE').length, [accidents])
   const resolvedCount = useMemo(() => accidents.filter(a => a.status === 'CLEARED').length, [accidents])
@@ -119,6 +121,39 @@ const heatLayer = L.heatLayer(heatPoints, {
     const map = mapInstance.current
     if (!map) return
 
+     // Remove old heat layer
+    if (heatLayerRef.current) {
+      map.removeLayer(heatLayerRef.current)
+    }
+
+    // Create heatmap points
+    const heatPoints = accidents
+      .filter(a => a.latitude && a.longitude)
+      .map(a => [
+        a.latitude,
+        a.longitude,
+        a.status === 'ACTIVE' ? 1 : 0.4
+      ])
+
+    // Create heat layer
+    heatLayerRef.current = L.heatLayer(heatPoints, {
+      radius: 55,
+      blur: 40,
+      minOpacity: 0.5,
+      maxZoom: 17,
+      gradient: {
+        0.2: '#3b82f6',
+        0.4: '#eab308',
+        0.7: '#f97316',
+        1.0: '#ef4444'
+      }
+    })
+
+    // Add to map
+    if (showHeatmap) {
+      heatLayerRef.current.addTo(map)
+    }
+
     // Clear removed ones or all if empty
     Object.values(markersRef.current).forEach(m => m.remove())
     markersRef.current = {}
@@ -162,7 +197,7 @@ const heatLayer = L.heatLayer(heatPoints, {
     if (bounds.length > 0) {
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 })
     }
-  }, [accidents])
+  }, [accidents , showHeatmap ])
 
   const focusIncident = (a) => {
     if (!a.latitude || !a.longitude) return
@@ -206,15 +241,32 @@ const heatLayer = L.heatLayer(heatPoints, {
 
           {/* Map Overlays */}
           <div className="absolute top-4 left-4 z-[999] glass-card flex items-center gap-3 px-3 py-2">
+
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-red-500 shadow-red-glow" />
-              <span className="font-mono text-[9px] text-slate-400 uppercase tracking-tighter">Active Spot</span>
+              <span className="font-mono text-[9px] text-slate-400 uppercase tracking-tighter">
+                Active Spot
+              </span>
             </div>
+
             <div className="w-px h-3 bg-white/10" />
+
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-emerald-glow" />
-              <span className="font-mono text-[9px] text-slate-400 uppercase tracking-tighter">Resolved Route</span>
+              <span className="font-mono text-[9px] text-slate-400 uppercase tracking-tighter">
+                Resolved Route
+              </span>
             </div>
+
+            <div className="w-px h-3 bg-white/10" />
+
+            <button
+              onClick={() => setShowHeatmap(!showHeatmap)}
+              className="px-2 py-1 rounded-md bg-black/40 border border-white/10 text-[9px] font-mono uppercase tracking-widest text-slate-300 hover:bg-white/10 transition"
+            >
+              {showHeatmap ? 'Hide Heatmap' : 'Show Heatmap'}
+            </button>
+
           </div>
         </div>
 
