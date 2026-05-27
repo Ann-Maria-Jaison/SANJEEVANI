@@ -76,7 +76,7 @@ export default function Topbar({ isOnline, usingMock, lastRefresh, onRefresh, ac
   }
 
   return (
-    <header className="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-navy-900/70 backdrop-blur-xl sticky top-0 z-30">
+    <header className="h-16 flex items-center justify-between px-6 border-b border-white/10 bg-navy-950/70 backdrop-blur-2xl sticky top-0 z-30 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
 
       {/* ── Left: breadcrumb + title ── */}
       <div className="flex flex-col justify-center gap-0.5">
