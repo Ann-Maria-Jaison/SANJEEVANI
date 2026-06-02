@@ -8,6 +8,8 @@ import AccidentMap from './pages/AccidentMap'
 import VehicleSearch from './pages/VehicleSearch'
 import CCTVMonitor from './pages/CCTVMonitor'
 import { useAccidents } from './hooks/useAccidents'
+import OfflineBanner from "./components/OfflineBanner";
+import UnsyncedWarning from "./components/UnsyncedWarning";
 
 function AppLayout() {
   const { accidents, loading, error, isOnline, lastRefresh, usingMock, refetch } = useAccidents(10000)
@@ -27,6 +29,9 @@ function AppLayout() {
           onRefresh={refetch}
           accidents={accidents}
         />
+
+        <OfflineBanner isOnline={isOnline} />
+        <UnsyncedWarning isOnline={isOnline} />
 
         <main className="flex-1 overflow-y-auto">
           <Routes>
@@ -50,7 +55,7 @@ function AppLayout() {
               path="/map"
               element={<AccidentMap accidents={accidents} loading={loading} />}
             />
-            <Route path="/vehicle" element={<VehicleSearch />} />
+            <Route path="/vehicle" element={<VehicleSearch isOnline={isOnline} />} />
             <Route path="/monitor" element={<CCTVMonitor />} />
           </Routes>
         </main>
