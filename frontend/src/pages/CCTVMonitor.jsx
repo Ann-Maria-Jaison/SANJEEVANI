@@ -14,6 +14,9 @@ export default function CCTVMonitor() {
     const [alertSent, setAlertSent] = useState(false)
     const [ambulancePos, setAmbulancePos] = useState(0) // 0 to 100%
     const [pollingError, setPollingError] = useState(null)
+    const [dispatchError, setDispatchError] = useState(null)
+    const [isDispatching, setIsDispatching] = useState(false)
+    const [dispatchResponse, setDispatchResponse] = useState(null)
 
     // Simulated Polling for new accidents
     useEffect(() => {
@@ -28,6 +31,10 @@ export default function CCTVMonitor() {
                 const latest = activeOnes[0]
                 if (latest && (!activeIncident || activeIncident.id !== latest.id)) {
                     setActiveIncident(latest)
+                    setAlertSent(false)
+                    setAmbulancePos(0)
+                    setDispatchError(null)
+                    setDispatchResponse(null)
                     fetchEmergencyServices(latest.plate, latest.camera_id)
                 }
             } catch (err) {
@@ -56,20 +63,29 @@ export default function CCTVMonitor() {
     }
 
     const handleSendAlert = async () => {
-        setAlertSent(true)
-        setTimeout(() => {
-            let pos = 0
-            const move = setInterval(() => {
-                pos += 2
-                setAmbulancePos(pos)
-                if (pos >= 100) clearInterval(move)
-            }, 200)
-        }, 1000)
+        if (!activeIncident?.id) {
+            setDispatchError('No active incident selected for dispatch.')
+            return
+        }
 
+        setIsDispatching(true)
+        setDispatchError(null)
         try {
-            await api.post('/send-alert', { accident_id: activeIncident.id })
+            const response = await api.post('/send-alert', { accident_id: activeIncident.id })
+            setDispatchResponse(response)
+            setAlertSent(true)
+            setTimeout(() => {
+                let pos = 0
+                const move = setInterval(() => {
+                    pos += 2
+                    setAmbulancePos(pos)
+                    if (pos >= 100) clearInterval(move)
+                }, 200)
+            }, 1000)
         } catch (e) {
-            console.log('Simulated alert call')
+            setDispatchError(e.message || 'Failed to dispatch emergency alerts.')
+        } finally {
+            setIsDispatching(false)
         }
     }
 
@@ -203,18 +219,29 @@ export default function CCTVMonitor() {
                             )}
 
                             <div className="mt-6 space-y-3">
+                                <ErrorBanner
+                                    message={dispatchError}
+                                    onDismiss={() => setDispatchError(null)}
+                                />
+
                                 {!alertSent ? (
                                     <button
                                         onClick={handleSendAlert}
+                                        disabled={isDispatching}
                                         className="w-full btn-primary !h-12 !justify-center bg-red-600 hover:bg-red-500 shadow-red-glow"
                                     >
                                         <Send className="w-4 h-4" />
-                                        DISPATCH & NOTIFY ALL
+                                        {isDispatching ? 'DISPATCHING...' : 'DISPATCH & NOTIFY ALL'}
                                     </button>
                                 ) : (
                                     <div className="space-y-4">
                                         <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center">
-                                            <p className="font-mono text-[10px] text-emerald-400 tracking-widest">ALERTS SENT VIA SMS</p>
+                                            <p className="font-mono text-[10px] text-emerald-400 tracking-widest">
+                                                {dispatchResponse?.status || 'ALERTS SENT'}
+                                            </p>
+                                            <p className="mt-1 font-mono text-[9px] text-emerald-400/70 tracking-wider">
+                                                {dispatchResponse?.message || 'Emergency dispatch confirmed'}
+                                            </p>
                                         </div>
 
                                         {/* Live Tracking Visualization */}
