@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional, List
+from typing import Dict, Optional
 
 class AccidentReport(BaseModel):
     plate: str
@@ -55,3 +55,21 @@ class AccidentSchema(BaseModel):
     severity: Optional[str] = "LOW"
     confidence: Optional[float] = None
     is_false_positive: Optional[bool] = False  # ADD THIS LINE
+
+class SendAlertRequest(BaseModel):
+    accident_id: int
+
+class DispatchServiceStatus(BaseModel):
+    name: str
+    status: str
+    contact: Optional[str] = None
+    eta_minutes: Optional[int] = None
+    message: Optional[str] = None
+
+class SendAlertResponse(BaseModel):
+    message: str
+    accident_id: int
+    status: str
+    dispatched_at: datetime
+    emergency_contact: Optional[str] = None
+    services: Dict[str, DispatchServiceStatus]
