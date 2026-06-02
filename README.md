@@ -135,6 +135,23 @@ It is an automated emergency response framework.
 - **Geospatial Intelligence**: Maps accident locations to the nearest hospitals and police stations.
 - **Live Tracking System**: Real-time ambulance dispatch and tracking for families and hospitals.
 - **Analytics Dashboard**: Comprehensive data visualization of accident trends and response times.
+- **Emergency Offline Mode**: Cached vehicle records remain accessible during connectivity failures, with automatic sync and unsynced search tracking on reconnection.
+
+## 🔌 Emergency Offline Mode
+
+SANJEEVANI includes an offline mode that ensures critical vehicle data remains accessible during connectivity failures.
+
+### How it works
+- When the backend is unreachable, a yellow **"Offline Mode Active"** banner appears with the last synced timestamp
+- Recently searched vehicle records are automatically cached in localStorage
+- Cached records (owner, phone, emergency contact, insurance, vehicle type) are served instantly when offline with a blue **"Cached"** badge
+- Any plates searched while offline are queued and shown as an amber warning on reconnection so staff know to re-query them
+- Cache entries automatically expire after **24 hours** for security
+
+### Security Notes
+- Cached data is Base64-encoded to prevent casual inspection
+- For production deployments, replace with AES-GCM encryption via the Web Crypto API
+- Cache is scoped with versioned keys (`sanjeevani_v1_`) to prevent collisions
 
 ## 🏗 System Architecture
 
