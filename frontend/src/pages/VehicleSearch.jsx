@@ -1,15 +1,16 @@
 import React, { useState } from 'react'
 import {
   Search, User, Phone, AlertTriangle,
-  Shield, Car, Hash, ChevronRight,
+  Shield, Car, Hash, ChevronRight, WifiOff,
 } from 'lucide-react'
 import { vehicleService } from '../api'
 import { MOCK_VEHICLES } from '../services/mockData'
 import ErrorBanner from '../components/ErrorBanner'
 import LoadingSpinner from '../components/LoadingSpinner'
 import EmptyState from '../components/EmptyState'
+import { useOfflineMode } from '../hooks/useOfflineMode'
 
-const DEMO_PLATES = ['KL07AB1234', 'KL04CD5678']
+const DEMO_PLATES = ['KL10UV9900', 'KL07CD5678']
 
 const FIELD_CONFIG = [
   { key: 'owner_name', label: 'Owner Name', icon: User, color: 'blue' },
@@ -28,13 +29,16 @@ const ICON_COLORS = {
   slate: { bg: 'bg-slate-500/10', text: 'text-slate-400', border: 'border-slate-500/10' },
 }
 
-export default function VehicleSearch() {
+export default function VehicleSearch({ isOnline }) {
   const [query, setQuery] = useState('')
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [searched, setSearched] = useState(false)
   const [usingMock, setUsingMock] = useState(false)
+  const [fromCache, setFromCache] = useState(false)
+
+  const { cacheVehicleRecord, getCachedVehicleByPlate, addUnsyncedSearch } = useOfflineMode()
 
   const handleSearch = async (plateOverride) => {
     const plate = (plateOverride || query).trim().toUpperCase().replace(/[-\s]/g, '')
@@ -45,15 +49,34 @@ export default function VehicleSearch() {
     setResult(null)
     setSearched(true)
     setUsingMock(false)
+    setFromCache(false)
 
+    // OFFLINE: serve from cache
+    if (isOnline === false) {
+      const cached = getCachedVehicleByPlate(plate)
+      if (cached) {
+        setResult(cached)
+        setFromCache(true)
+      } else {
+        addUnsyncedSearch(plate)
+        setError(`You're offline. No cached data found for plate: ${plate}`)
+      }
+      setLoading(false)
+      return
+    }
+
+    // ONLINE: normal fetch, then cache result
     try {
       const data = await vehicleService.getByPlate(plate)
-      setResult({ ...data, plate })
+      const record = { ...data, plate }
+      setResult(record)
+      cacheVehicleRecord(record)           // ← cache it for offline use
     } catch {
-      // Fallback to mock
       if (MOCK_VEHICLES[plate]) {
-        setResult(MOCK_VEHICLES[plate])
+        const record = MOCK_VEHICLES[plate]
+        setResult(record)
         setUsingMock(true)
+        cacheVehicleRecord(record)         // ← cache mock too
       } else {
         setError(`No vehicle found for plate: ${plate}`)
       }
@@ -158,6 +181,12 @@ export default function VehicleSearch() {
               {usingMock && (
                 <span className="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 font-mono text-[9px] tracking-widest text-amber-500 uppercase flex-shrink-0">
                   Demo
+                </span>
+              )}
+              {fromCache && (
+                <span className="px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 font-mono text-[9px] tracking-widest text-blue-400 uppercase flex-shrink-0 flex items-center gap-1">
+                  <WifiOff className="w-3 h-3" />
+                  Cached
                 </span>
               )}
             </div>
