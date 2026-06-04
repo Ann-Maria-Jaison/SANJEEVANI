@@ -16,6 +16,46 @@ def get_canonical_status(status_raw: str) -> str:
         return "ACTIVE"
     return "CLEARED"
 
+def get_severity_analysis(confidence):
+    if confidence is None or confidence < 0.40:
+        return {
+            "severity_level": "Unknown",
+            "possible_impact": "Insufficient confidence for reliable assessment",
+            "recommended_action": "Manual verification required",
+            "response_priority": "Review"
+        }
+
+    elif confidence >= 0.90:
+        return {
+            "severity_level": "Critical",
+            "possible_impact": "Potential major collision with injuries",
+            "recommended_action": "Dispatch ambulance immediately",
+            "response_priority": "Critical"
+        }
+
+    elif confidence >= 0.75:
+        return {
+            "severity_level": "High",
+            "possible_impact": "Significant vehicle damage possible",
+            "recommended_action": "Alert emergency responders",
+            "response_priority": "High"
+        }
+
+    elif confidence >= 0.50:
+        return {
+            "severity_level": "Medium",
+            "possible_impact": "Moderate accident risk",
+            "recommended_action": "Monitor situation and verify",
+            "response_priority": "Medium"
+        }
+
+    return {
+        "severity_level": "Low",
+        "possible_impact": "Minor incident suspected",
+        "recommended_action": "Record event for review",
+        "response_priority": "Low"
+    }
+
 @router.post("/report-accident", response_model=AccidentResponse)
 async def report_accident(report: AccidentReport):
     # Insert logs
@@ -24,7 +64,6 @@ async def report_accident(report: AccidentReport):
         "camera_id": report.camera_id,
         "accident_time": report.accident_time.isoformat(),
         "status": "reported",
-        "confidence": report.confidence   # ADDED THIS LINE
     }
     log_res = supabase.table("accident_logs").insert(log_data).execute()
     
@@ -37,6 +76,7 @@ async def report_accident(report: AccidentReport):
     
     vehicle = veh_res.data or {}
     camera = cam_res.data or {}
+    severity_analysis = get_severity_analysis(report.confidence)
     
     return AccidentResponse(
         message="ACCIDENT_RECORDED",
@@ -47,9 +87,10 @@ async def report_accident(report: AccidentReport):
         owner_phone=vehicle.get("owner_phone", "N/A"),
         emergency_contact=vehicle.get("emergency_contact", "N/A"),
         location=camera.get("area_name", "Unknown"),
-        severity="HIGH",
-        confidence=report.confidence  # ADDED THIS LINE
-    )
+        severity=severity_analysis["severity_level"],
+        confidence=report.confidence,
+        severity_analysis=severity_analysis
+        )
 
 @router.get("/accidents", response_model=List[AccidentSchema])
 async def get_accidents():
@@ -92,6 +133,7 @@ async def get_accidents():
             "location": camera.get("area_name"),
             "latitude": camera.get("latitude"),
             "longitude": camera.get("longitude"),
+            "confidence": a.get("confidence"),
             "is_false_positive": a.get("is_false_positive", False),  # ADD THIS LINE
         })
 
