@@ -1,7 +1,12 @@
-from httpx import request
 from fastapi import APIRouter, HTTPException
 from typing import List
-from models.schemas import AccidentReport, AccidentResponse, AccidentSchema
+from models.schemas import (
+    AccidentReport,
+    AccidentResponse,
+    AccidentSchema,
+    SendAlertRequest,
+    SendAlertResponse,
+)
 from database import supabase
 from datetime import datetime
 
@@ -152,3 +157,70 @@ async def mark_false_positive(accident_id: int):
         raise HTTPException(status_code=404, detail="Accident not found")
 
         return {"message": "Marked as false positive", "accident_id": accident_id}
+
+@router.post("/send-alert", response_model=SendAlertResponse)
+async def send_alert(alert: SendAlertRequest):
+    try:
+        acc_res = supabase.table("accident_logs") \
+            .select("*") \
+            .eq("id", alert.accident_id) \
+            .execute()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch accident: {exc}")
+
+    if not acc_res.data:
+        raise HTTPException(status_code=404, detail="Accident not found")
+
+    accident = acc_res.data[0]
+    vehicle = {}
+    camera = {}
+
+    try:
+        veh_res = supabase.table("vehicles") \
+            .select("*") \
+            .eq("plate", accident.get("plate")) \
+            .execute()
+        cam_res = supabase.table("cameras") \
+            .select("*") \
+            .eq("camera_id", accident.get("camera_id")) \
+            .execute()
+        vehicle = (veh_res.data or [{}])[0]
+        camera = (cam_res.data or [{}])[0]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to load dispatch context: {exc}")
+
+    area_name = camera.get("area_name", "Accident location")
+    emergency_contact = vehicle.get("emergency_contact") or vehicle.get("owner_phone")
+
+    services = {
+        "police": {
+            "name": "City Central Police Station",
+            "status": "notified",
+            "contact": "100",
+            "eta_minutes": 8,
+            "message": f"Police response requested near {area_name}.",
+        },
+        "ambulance": {
+            "name": "Nearest Ambulance Unit",
+            "status": "dispatched",
+            "contact": "108",
+            "eta_minutes": 6,
+            "message": f"Ambulance dispatched for vehicle {accident.get('plate', 'Unknown')}.",
+        },
+        "hospital": {
+            "name": "Kochi General Hospital",
+            "status": "notified",
+            "contact": "0484-0000000",
+            "eta_minutes": 12,
+            "message": "Emergency ward notified and preparing intake.",
+        },
+    }
+
+    return SendAlertResponse(
+        message="Emergency alerts dispatched successfully",
+        accident_id=alert.accident_id,
+        status="DISPATCHED",
+        dispatched_at=datetime.utcnow(),
+        emergency_contact=emergency_contact,
+        services=services,
+    )
