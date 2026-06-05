@@ -8,6 +8,12 @@ class AccidentReport(BaseModel):
     accident_time: datetime
     confidence: Optional[float] = None
 
+class SeverityAnalysis(BaseModel):
+    severity_level: str
+    possible_impact: str
+    recommended_action: str
+    response_priority: str    
+
 class AccidentResponse(BaseModel):
     status: str
     plate: str
@@ -20,6 +26,7 @@ class AccidentResponse(BaseModel):
     location: str
     severity: str
     confidence: Optional[float] = None  # ADDED THIS LINE
+    severity_analysis: SeverityAnalysis
 
 class VehicleSchema(BaseModel):
     plate: str
