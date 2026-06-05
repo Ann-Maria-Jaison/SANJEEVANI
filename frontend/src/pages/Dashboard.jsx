@@ -254,7 +254,7 @@ export default function Dashboard({ accidents, loading, error }) {
             <div
               key={s.label}
               className={`glass-card px-5 py-4 flex items-center justify-between ${s.glow} hover:scale-[1.02] transition-transform duration-300`}
-              style={{ animationDelay: \`\${200 + i * 50}ms\` }}
+              style={{ animationDelay: `${200 + i * 50}ms` }}
             >
               <div>
                 <p className="font-mono text-[10px] text-slate-400 tracking-widest uppercase mb-1">{s.label}</p>
