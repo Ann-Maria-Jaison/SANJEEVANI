@@ -28,6 +28,7 @@ export default api
 export const accidentService = {
   getAll: () => api.get('/accidents'),
   getById: (id) => api.get(`/accidents/${id}`),
+  markFalsePositive: (id) => api.patch(`/accidents/${id}/false-positive`),
 }
 
 export const vehicleService = {

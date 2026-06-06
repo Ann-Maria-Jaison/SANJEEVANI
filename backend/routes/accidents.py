@@ -152,8 +152,8 @@ async def mark_false_positive(accident_id: int):
             .update({"is_false_positive": True}) \
             .eq("id", accident_id) \
             .execute()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Database error: {exc}")
 
     if not res.data:
         raise HTTPException(status_code=404, detail="Accident not found")

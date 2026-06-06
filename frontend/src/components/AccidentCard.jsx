@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { MapPin, User, Clock, Car, AlertTriangle, CheckCircle2, Phone, FileText, XCircle } from 'lucide-react'
 import clsx from 'clsx'
-import api from '../api'
+import { accidentService } from '../api'
 
 function timeAgo(ts) {
   const diff = Math.floor((Date.now() - new Date(ts)) / 1000)
@@ -45,7 +45,8 @@ export default function AccidentCard({ accident, style }) {
   const [isFalsePositive, setIsFalsePositive] = useState(accident.is_false_positive || false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [hasError, setHasError] = useState(false)
+  const [fpError, setFpError] = useState(null)
+>>>>>>> 4212c89 (fix: stabilize false-positive reporting flow)
   const confidenceLevel = getConfidenceLevel(accident.confidence)  // ADDED THIS
   const confidenceInfo = confidenceLevel ? CONFIDENCE_STYLES[confidenceLevel] : null  // ADDED THIS
 
@@ -204,37 +205,37 @@ export default function AccidentCard({ accident, style }) {
                 Mark as false positive
               </button>
             ) : (
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] text-slate-500">Are you sure?</span>
-                <button
-                  onClick={async (e) => {
-                    e.stopPropagation()
-                    setIsLoading(true)
-                    setHasError(false)
-                    try {
-                      await api.patch(`/accidents/${accident.id}/false-positive`)
-                      setIsFalsePositive(true)
-                      setShowConfirm(false)
-                    } catch (err) {
-                      console.error('Failed to mark false positive:', err)
-                      setHasError(true)
-                    } finally {
-                      setIsLoading(false)
-                    }
-                  }}
-                  disabled={isLoading}
-                  className="text-[10px] text-red-400 hover:text-red-300 font-bold disabled:opacity-50"
-                >
-                  {isLoading ? 'Saving...' : 'Confirm'}
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setShowConfirm(false); setHasError(false) }}
-                  className="text-[10px] text-slate-600 hover:text-slate-400"
-                >
-                  Cancel
-                </button>
-                {hasError && (
-                  <span className="text-[10px] text-red-400 w-full mt-0.5">Failed to save. Try again.</span>
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-slate-500">Are you sure?</span>
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation()
+                      setIsLoading(true)
+                      setFpError(null)
+                      try {
+                        await accidentService.markFalsePositive(accident.id)
+                        setIsFalsePositive(true)
+                        setShowConfirm(false)
+                      } catch (err) {
+                        setFpError('Failed to mark as false positive. Please try again.')
+                      } finally {
+                        setIsLoading(false)
+                      }
+                    }}
+                    className="text-[10px] text-red-400 hover:text-red-300 font-bold"
+                  >
+                    {isLoading ? 'Saving...' : 'Confirm'}
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setShowConfirm(false) }}
+                    className="text-[10px] text-slate-600 hover:text-slate-400"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                {fpError && (
+                  <span className="text-[10px] text-red-400">{fpError}</span>
                 )}
               </div>
             )}
