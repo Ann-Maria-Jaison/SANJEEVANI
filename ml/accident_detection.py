@@ -81,7 +81,8 @@ def report_to_backend(plate, confidence, camera_id="CAM001", severity_result=Non
 print("▶ Smooth optimized video running...\n")
 
 reported = False
-
+# Define the confidence threshold
+CONFIDENCE_THRESHOLD = 0.5 
 
 while True:
     ret, frame = cap.read()
@@ -109,36 +110,35 @@ while True:
                         cv2.imwrite(f"captured_frames/accident_{frame_count}.jpg", small_frame)
                         cv2.imwrite(f"captured_frames/vehicle_{frame_count}.jpg", vehicle_crop)
 
-                        # --- OCR attempt ---
+                        # --- NEW UPDATED OCR LOGIC ---
                         print("🔎 Performing OCR on vehicle crop...")
-                        plate = detect_plate_from_frame(vehicle_crop)
+                        plate_text, ocr_conf = detect_plate_from_frame(vehicle_crop)
 
-                        if plate:
-                            print(f"✅ OCR Plate Detected: {plate}")
-                            # Validate if plate exists in our database
+                        if plate_text and ocr_conf >= CONFIDENCE_THRESHOLD:
+                            print(f"✅ OCR Plate Detected: {plate_text} (conf={ocr_conf:.2f})")
+                            # Verify with database
                             try:
-                                check = requests.get(f"{API_URL}/vehicle/{plate}", timeout=3)
-                                if check.status_code != 200:
-                                    print(f"⚠️ Plate '{plate}' not in database. Using a registered plate instead.")
-                                    plate = random.choice(DB_PLATES)
+                                check = requests.get(f"{API_URL}/vehicle/{plate_text}", timeout=3)
+                                if check.status_code == 200:
+                                    plate = plate_text
+                                else:
+                                    print(f"⚠️ Plate '{plate_text}' not in database.")
+                                    plate = "UNREADABLE_PLATE" # Fallback
                             except Exception:
-                                plate = random.choice(DB_PLATES)
+                                plate = "UNREADABLE_PLATE"
                         else:
-                            # OCR failed — pick a random real plate from DB
-                            plate = random.choice(DB_PLATES)
-                            print(f"⚠️ OCR failed. Using registered plate from database: {plate}")
+                            # Trigger fallback due to low confidence or failure
+                            print(f"⚠️ OCR failed or confidence too low ({ocr_conf:.2f}).")
+                            plate = "UNREADABLE_PLATE" 
 
-                        print(f"✅ Final Plate: {plate}")
+                        print(f"✅ Final Plate for report: {plate}")
                         severity_result = severity_clf.classify(small_frame)
                         print(f"🚨 Severity: {severity_result['severity']} ({severity_result['confidence']*100:.0f}%)")
                         
-                        if report_to_backend(plate, conf,severity_result=severity_result):
+                        if report_to_backend(plate, conf, severity_result=severity_result):
                             reported = True
                             print("✅ Incident Reported Successfully.\n")
 
     cv2.imshow("Accident Detection", small_frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-
-cap.release()
-cv2.destroyAllWindows()
