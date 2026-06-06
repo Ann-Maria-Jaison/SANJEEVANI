@@ -1,144 +1,44 @@
 from ultralytics import YOLO
 import cv2
 import os
-import requests
-import random
-from datetime import datetime
 from plate_detection import detect_plate_from_frame
-from severity_classifier import SeverityClassifier
 
-severity_clf = SeverityClassifier("severity_cls.pt")
-
-# -------- CONFIG --------
-API_URL = "http://localhost:8000"
-ACCIDENT_CONFIDENCE = 0.9
-FRAME_SKIP = 5
-
-# -------- LOAD MODEL --------
+# --- Setup ---
 model = YOLO("yolov8n.pt")
-cap = cv2.VideoCapture("accident_video.mp4")
+video_path = os.path.join(os.path.dirname(__file__), "accident_video.mp4")
+cap = cv2.VideoCapture(video_path)
 
-frame_count = 0
-if not os.path.exists("captured_frames"):
-    os.makedirs("captured_frames")
-
-# -------- FETCH PLATES FROM DATABASE --------
-def fetch_db_plates():
-    """Fetch all registered vehicle plates from the backend."""
-    try:
-        res = requests.get(f"{API_URL}/vehicles/all", timeout=5)
-        if res.status_code == 200:
-            plates = [v["plate"] for v in res.json()]
-            if plates:
-                print(f"✅ Loaded {len(plates)} plates from database.")
-                return plates
-    except Exception as e:
-        print(f"⚠️ Could not fetch plates from API: {e}")
-    # Fallback: hardcoded from the vehicles table
-    return [
-        "KL01AB1234", "KL07CD5678", "KL10EF1111",
-        "KL01CD5678", "KL02EF2345", "KL03GH6789",
-        "KL04IJ3456", "KL05KL7890", "KL06MN1234",
-        "KL08PQ5678", "KL09RS9012", "KL11TU3456",
-        "KL12VW7890", "KL13XY2345", "KL14BB8899",
-        "KL15CC1010", "KL16DD2020", "KL17EE3030",
-        "KL18FF4040", "KL19GG5050", "KL20HH6060",
-    ]
-
-DB_PLATES = fetch_db_plates()
-
-# -------- SEND TO BACKEND --------
-def report_to_backend(plate, confidence, camera_id="CAM001", severity_result=None):
-    payload = {
-        "plate": plate,
-        "camera_id": camera_id,
-        "accident_time": datetime.now().isoformat(),
-        "confidence": confidence,
-         "severity": severity_result.get("severity", "Unknown") if severity_result else "Unknown",
-        "severity_confidence": severity_result.get("confidence", 0.0) if severity_result else 0.0,
-        "hospital_protocol": severity_result.get("protocol", "") if severity_result else "",
-    }
-    try:
-        print(f"📡 Sending report to backend: {payload}")
-        response = requests.post(f"{API_URL}/report-accident", json=payload, timeout=5)
-        if response.status_code == 200:
-            data = response.json()
-            print("✅ Backend Response:")
-            print(f"   Owner     : {data.get('owner_name', 'Unknown')}")
-            print(f"   Phone     : {data.get('owner_phone', 'N/A')}")
-            print(f"   Emergency : {data.get('emergency_contact', 'N/A')}")
-            print(f"   Location  : {data.get('location', 'N/A')}")
-            print(f"   Severity  : {payload['severity']} ({payload['severity_confidence']*100:.0f}%)")
-            print(f"   Protocol  : {payload['hospital_protocol']}")
-            return True
-        else:
-            print(f"❌ Failed. Status: {response.status_code} - {response.text}")
-    except Exception as e:
-        print(f"❌ Connection Error: {e}")
-    return False
-
-# -------- MAIN DETECTION LOOP --------
-print("▶ Smooth optimized video running...\n")
-
-reported = False
-# Define the confidence threshold
-CONFIDENCE_THRESHOLD = 0.5 
+print("▶ Starting video processing...")
 
 while True:
     ret, frame = cap.read()
     if not ret:
-        print("\n🛑 Video finished.\n")
+        print("\n🛑 Video finished.")
         break
 
-    frame_count += 1
+    # Process the frame
     small_frame = cv2.resize(frame, (640, 360))
+    results = model(small_frame, verbose=False)
 
-    if frame_count % FRAME_SKIP == 0 and not reported:
-        results = model(small_frame, verbose=False)
+    # LOOP IS NOW INDENTED CORRECTLY
+    for r in results:
+        for box in r.boxes:
+            x1, y1, x2, y2 = map(int, box.xyxy[0])
+            vehicle_crop = small_frame[y1:y2, x1:x2]
 
-        for r in results:
-            for box in r.boxes:
-                conf = float(box.conf[0])
+            if vehicle_crop.size > 0:
+                print("🔎 Performing OCR on vehicle crop...")
+                plate_text, ocr_conf = detect_plate_from_frame(vehicle_crop)
+                
+                if plate_text:
+                    print(f"✅ SUCCESS: Plate Detected: {plate_text}")
+                else:
+                    print("⚠️ No plate readable in this frame.")
 
-                if conf > ACCIDENT_CONFIDENCE:
-                    print(f"🚗 Accident detected! (conf={conf:.2f}) Capturing frame...")
-
-                    x1, y1, x2, y2 = map(int, box.xyxy[0])
-                    vehicle_crop = small_frame[y1:y2, x1:x2]
-
-                    if vehicle_crop.size != 0:
-                        cv2.imwrite(f"captured_frames/accident_{frame_count}.jpg", small_frame)
-                        cv2.imwrite(f"captured_frames/vehicle_{frame_count}.jpg", vehicle_crop)
-
-                        # --- NEW UPDATED OCR LOGIC ---
-                        print("🔎 Performing OCR on vehicle crop...")
-                        plate_text, ocr_conf = detect_plate_from_frame(vehicle_crop)
-
-                        if plate_text and ocr_conf >= CONFIDENCE_THRESHOLD:
-                            print(f"✅ OCR Plate Detected: {plate_text} (conf={ocr_conf:.2f})")
-                            # Verify with database
-                            try:
-                                check = requests.get(f"{API_URL}/vehicle/{plate_text}", timeout=3)
-                                if check.status_code == 200:
-                                    plate = plate_text
-                                else:
-                                    print(f"⚠️ Plate '{plate_text}' not in database.")
-                                    plate = "UNREADABLE_PLATE" # Fallback
-                            except Exception:
-                                plate = "UNREADABLE_PLATE"
-                        else:
-                            # Trigger fallback due to low confidence or failure
-                            print(f"⚠️ OCR failed or confidence too low ({ocr_conf:.2f}).")
-                            plate = "UNREADABLE_PLATE" 
-
-                        print(f"✅ Final Plate for report: {plate}")
-                        severity_result = severity_clf.classify(small_frame)
-                        print(f"🚨 Severity: {severity_result['severity']} ({severity_result['confidence']*100:.0f}%)")
-                        
-                        if report_to_backend(plate, conf, severity_result=severity_result):
-                            reported = True
-                            print("✅ Incident Reported Successfully.\n")
-
+    # Show the video
     cv2.imshow("Accident Detection", small_frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+
+cap.release()
+cv2.destroyAllWindows()
