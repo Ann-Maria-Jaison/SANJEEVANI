@@ -1,13 +1,19 @@
+import os
+from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes import accidents, vehicles
 
 app = FastAPI(title="Sanjeevani Smart Accident Detection API")
 
+# Configure CORS from environment variable
+allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:8000")
+allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",")]
+
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:8000"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -23,7 +29,7 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "timestamp": "now"}
+    return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
 
 if __name__ == "__main__":
     import uvicorn
