@@ -216,8 +216,9 @@ cd backend
 # Install dependencies
 pip install -r requirements.txt
 
-# Set up environment variables (.env)
-# Create a .env file with your SUPABASE_URL and SUPABASE_KEY
+# Set up environment variables
+cp .env.example .env
+# Then open .env and fill in your SUPABASE_URL and SUPABASE_KEY
 
 # Start the FastAPI server
 python main.py
@@ -232,6 +233,10 @@ cd frontend
 # Install dependencies
 npm install
 
+# Set up environment variables
+cp .env.example .env
+# Edit .env if your backend runs on a different port
+
 # Start the development server
 npm run dev
 ```
@@ -241,6 +246,9 @@ The dashboard will be available at `http://localhost:5173`.
 ```bash
 # Navigate to the ml directory
 cd ml
+
+# Install ML dependencies
+pip install -r requirements.txt
 
 # Ensure backend is running first!
 # Run the detection script

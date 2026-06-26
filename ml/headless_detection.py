@@ -12,9 +12,9 @@ ACCIDENT_CONFIDENCE = 0.8  # Lowered for demo consistency
 FRAME_SKIP = 30 # Check every 1 second of video roughly
 
 # -------- LOAD MODEL --------
-# Use absolute path for robustness
-MODEL_PATH = "C:\\Users\\Ann\\Desktop\\Sanjeevani\\ml\\yolov8n.pt"
-VIDEO_PATH = "C:\\Users\\Ann\\Desktop\\Sanjeevani\\ml\\accident_video.mp4"
+_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(_DIR, "yolov8n.pt")
+VIDEO_PATH = os.path.join(_DIR, "accident_video.mp4")
 
 model = YOLO(MODEL_PATH)
 cap = cv2.VideoCapture(VIDEO_PATH)
