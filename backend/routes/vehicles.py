@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from typing import List
 from database import supabase
 from models.schemas import VehicleSchema
@@ -6,9 +6,9 @@ from models.schemas import VehicleSchema
 router = APIRouter()
 
 @router.get("/vehicles/all", response_model=List[VehicleSchema])
-async def get_all_vehicles():
-    result = supabase.table("vehicles").select("*").execute()
-    return result.data
+async def get_all_vehicles(limit: int = Query(50, ge=1, le=200), offset: int = Query(0, ge=0)):
+    result = supabase.table("vehicles").select("*").range(offset, offset + limit - 1).execute()
+    return result.data or []
 
 @router.get("/vehicle/{plate}", response_model=VehicleSchema)
 async def get_vehicle(plate: str):
