@@ -1,0 +1,3 @@
+ALTER TABLE accident_logs
+  ADD COLUMN alert_status TEXT DEFAULT NULL,
+  ADD COLUMN alerted_at   TIMESTAMPTZ DEFAULT NULL;

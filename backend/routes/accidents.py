@@ -172,6 +172,24 @@ async def send_alert(alert: SendAlertRequest):
         raise HTTPException(status_code=404, detail="Accident not found")
 
     accident = acc_res.data[0]
+
+    if accident.get("alert_status") == "DISPATCHED":
+        raise HTTPException(
+            status_code=409,
+            detail="Alert already dispatched for this accident."
+        )
+
+    try:
+        supabase.table("accident_logs") \
+            .update({
+                "alert_status": "DISPATCHED",
+                "alerted_at": datetime.utcnow().isoformat()
+            }) \
+            .eq("id", alert.accident_id) \
+            .execute()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to update alert status: {exc}")
+
     vehicle = {}
     camera = {}
 
