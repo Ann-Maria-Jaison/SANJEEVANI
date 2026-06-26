@@ -156,7 +156,7 @@ async def mark_false_positive(accident_id: int):
     if not res.data:
         raise HTTPException(status_code=404, detail="Accident not found")
 
-        return {"message": "Marked as false positive", "accident_id": accident_id}
+    return {"message": "Marked as false positive", "accident_id": accident_id}
 
 @router.post("/send-alert", response_model=SendAlertResponse)
 async def send_alert(alert: SendAlertRequest):
