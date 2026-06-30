@@ -1,35 +1,19 @@
-import easyocr
 import cv2
 import numpy as np
+import easyocr
 
+# Initialize the reader
 reader = easyocr.Reader(['en'])
 
 def detect_plate_from_frame(frame):
-
-    # Convert to grayscale
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-    # Improve contrast
-    gray = cv2.equalizeHist(gray)
-
-    # Reduce noise
-    gray = cv2.GaussianBlur(gray, (5, 5), 0)
-
-    # Sharpen
-    kernel = np.array([[0, -1, 0],
-                       [-1, 5, -1],
-                       [0, -1, 0]])
-    processed = cv2.filter2D(gray, -1, kernel)
-
-    results = reader.readtext(processed)
+    # Just use the original frame without heavy filtering first
+    results = reader.readtext(frame)
 
     for (bbox, text, prob) in results:
         cleaned_text = text.replace(" ", "").upper()
+        # If we find ANY text, let's trust it for now
+        if len(cleaned_text) > 4: 
+            print(f"✅ FOUND PLATE: {cleaned_text} (Conf: {prob:.2f})")
+            return cleaned_text, prob
 
-        # Simple validation for Indian plates
-        if prob > 0.6 and 8 <= len(cleaned_text) <= 12:
-            print("🔎 Detected Plate:", cleaned_text)
-            return cleaned_text
-
-    return None
-    
+    return None, 0.0
