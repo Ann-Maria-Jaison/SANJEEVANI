@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { MapPin, User, Clock, Car, AlertTriangle, CheckCircle2, Phone, FileText, XCircle } from 'lucide-react'
 import clsx from 'clsx'
+import { accidentService } from '../api'
 
 function timeAgo(ts) {
   const diff = Math.floor((Date.now() - new Date(ts)) / 1000)
@@ -41,9 +42,11 @@ export default function AccidentCard({ accident, style }) {
   const severity = accident.severity || (isActive ? 'HIGH' : 'LOW')
   const severityLabels = {HIGH: 'SEVERE EMERGENCY', MEDIUM: 'CRITICAL',LOW: 'LOW RISK'}
   const severityStyle = SEVERITY_STYLES[severity] || SEVERITY_STYLES.LOW
-  const [isFalsePositive, setIsFalsePositive] = useState(accident.is_false_positive || false)  // ADD
-  const [showConfirm, setShowConfirm] = useState(false)  // ADD
-  const [isLoading, setIsLoading] = useState(false)  // ADD
+  const [isFalsePositive, setIsFalsePositive] = useState(accident.is_false_positive || false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [fpError, setFpError] = useState(null)
+>>>>>>> 4212c89 (fix: stabilize false-positive reporting flow)
   const confidenceLevel = getConfidenceLevel(accident.confidence)  // ADDED THIS
   const confidenceInfo = confidenceLevel ? CONFIDENCE_STYLES[confidenceLevel] : null  // ADDED THIS
 
@@ -202,33 +205,38 @@ export default function AccidentCard({ accident, style }) {
                 Mark as false positive
               </button>
             ) : (
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-slate-500">Are you sure?</span>
-                <button
-                  onClick={async (e) => {
-                    e.stopPropagation()
-                    setIsLoading(true)
-                    try {
-                      await fetch(`http://localhost:8000/accidents/${accident.id}/false-positive`, {
-                        method: 'PATCH'
-                      })
-                      setIsFalsePositive(true)
-                    } catch (err) {
-                      console.error(err)
-                    }
-                    setIsLoading(false)
-                    setShowConfirm(false)
-                  }}
-                  className="text-[10px] text-red-400 hover:text-red-300 font-bold"
-                >
-                  {isLoading ? 'Saving...' : 'Confirm'}
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setShowConfirm(false) }}
-                  className="text-[10px] text-slate-600 hover:text-slate-400"
-                >
-                  Cancel
-                </button>
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-slate-500">Are you sure?</span>
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation()
+                      setIsLoading(true)
+                      setFpError(null)
+                      try {
+                        await accidentService.markFalsePositive(accident.id)
+                        setIsFalsePositive(true)
+                        setShowConfirm(false)
+                      } catch (err) {
+                        setFpError('Failed to mark as false positive. Please try again.')
+                      } finally {
+                        setIsLoading(false)
+                      }
+                    }}
+                    className="text-[10px] text-red-400 hover:text-red-300 font-bold"
+                  >
+                    {isLoading ? 'Saving...' : 'Confirm'}
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setShowConfirm(false) }}
+                    className="text-[10px] text-slate-600 hover:text-slate-400"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                {fpError && (
+                  <span className="text-[10px] text-red-400">{fpError}</span>
+                )}
               </div>
             )}
           </div>
